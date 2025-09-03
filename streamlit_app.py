@@ -31,26 +31,25 @@ if ingredients_list:
     ingredients_string = ", ".join(ingredients_list)
     st.write("Ingredients chosen:", ingredients_string)
 
-    # Loop through selected fruits
     for fruit_chosen in ingredients_list:
-        # Look up the search term from Snowflake
-        search_term = (
-            my_dataframe.filter(col("FRUIT_NAME") == fruit_chosen)
+        # 🔎 Look up SEARCH_ON from Snowflake for this FRUIT_NAME
+        search_value = (
+            session.table("smoothies.public.fruit_options")
+            .filter(col("FRUIT_NAME") == fruit_chosen)
             .select(col("SEARCH_ON"))
             .collect()[0][0]
         )
 
         st.subheader(f"{fruit_chosen} Nutrition Information")
 
-        try:
-            # Call API with the search term
-            response = requests.get(f"https://my.smoothiefroot.com/api/fruit/{search_term}")
+        if search_value == "N/A":
+            st.warning(f"Sorry, {fruit_chosen} is not available in SmoothieFroot.")
+        else:
+            response = requests.get(f"https://my.smoothiefroot.com/api/fruit/{search_value}")
             if response.status_code == 200:
                 st.dataframe(response.json(), use_container_width=True)
             else:
-                st.warning(f"Sorry, no data found for {fruit_chosen}")
-        except Exception as e:
-            st.error(f"Error fetching data for {fruit_chosen}: {e}")
+                st.error(f"Could not fetch data for {fruit_chosen}")
 
 
 # Add a Submit button
