@@ -1,6 +1,7 @@
 # Import python packages
 import streamlit as st
 from snowflake.snowpark.functions import col
+import requests
 
 cnx = st.connection("snowflake")
 session = cnx.session()
@@ -25,10 +26,11 @@ ingredients_list = st.multiselect(
 
 # Only proceed if user picked something
 if ingredients_list:
-    # Convert list into a comma-separated string
-    ingredients_string = ", ".join(ingredients_list)
-
-    st.write("Ingredients chosen:", ingredients_string)
+    ingredients_string = ''
+    for fruit_chosen in ingredients_tist:
+        ingredients_string += fruit_chosen + ' ' 
+        smoothiefroot_response = requests.get("https://my.smoothiefroot.com/api/fruit/watermelon")
+        st_dt= st.dataframe(data=smoothiefroot_response.json(), use_container_width=True)
 
     # Add a Submit button
     if st.button("Submit Order"):
@@ -39,8 +41,7 @@ if ingredients_list:
         session.sql(my_insert_stmt).collect()
         st.success('Your Smoothie is ordered! ✅')
 
-import requests
-smoothiefroot_response = requests.get("https://my.smoothiefroot.com/api/fruit/watermelon")
-st.text(smoothiefroot_response)
-#st.text(smoothiefroot_response.json())
-st_dt= st.dataframe(data=smoothiefroot_response.json(), use_container_width=True)
+
+
+
+
