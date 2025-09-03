@@ -15,7 +15,10 @@ name_on_order = st.text_input("Name on Smoothie:")
 st.write("The name on your Smoothie will be", name_on_order)
 
 # Get fruit options from Snowflake
-my_dataframe = session.table("smoothies.public.fruit_options").select(col('FRUIT_NAME'))
+my_dataframe = session.table("smoothies.public.fruit_options").select(
+    col("FRUIT_NAME"), col("SEARCH_ON")
+)
+
 
 # Multiselect for ingredients
 ingredients_list = st.multiselect(
@@ -24,12 +27,31 @@ ingredients_list = st.multiselect(
     max_selections=5    
 )
 
-# Only proceed if user picked something
 if ingredients_list:
-    # Convert list into a comma-separated string
     ingredients_string = ", ".join(ingredients_list)
-
     st.write("Ingredients chosen:", ingredients_string)
+
+    # Loop through selected fruits
+    for fruit_chosen in ingredients_list:
+        # Look up the search term from Snowflake
+        search_term = (
+            my_dataframe.filter(col("FRUIT_NAME") == fruit_chosen)
+            .select(col("SEARCH_ON"))
+            .collect()[0][0]
+        )
+
+        st.subheader(f"{fruit_chosen} Nutrition Information")
+
+        try:
+            # Call API with the search term
+            response = requests.get(f"https://my.smoothiefroot.com/api/fruit/{search_term}")
+            if response.status_code == 200:
+                st.dataframe(response.json(), use_container_width=True)
+            else:
+                st.warning(f"Sorry, no data found for {fruit_chosen}")
+        except Exception as e:
+            st.error(f"Error fetching data for {fruit_chosen}: {e}")
+
 
 # Add a Submit button
 if st.button("Submit Order"):
