@@ -48,9 +48,13 @@ if ingredients_list:
                 st.warning(f"Sorry, no data found for {fruit_chosen}")
 
     # Add a Submit button
-    if st.button("Submit Order"):
-       my_insert_stmt = f""" INSERT INTO smoothies.public.orders(ingredients, name_on_order) VALUES ('{ingredients_string}', '{name_on_order}') """ 
-        session.sql(my_insert_stmt).collect()
+if st.button("Submit Order"):
+    my_insert_stmt = """
+    INSERT INTO smoothies.public.orders(ingredients, name_on_order)
+    VALUES (?, ?)
+"""
+    session.sql(my_insert_stmt, (ingredients_string, name_on_order)).collect()
 
-        st.success('Your Smoothie is ordered! ✅')
+
+    st.success('Your Smoothie is ordered! ✅')
 
