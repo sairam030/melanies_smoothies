@@ -49,11 +49,8 @@ if ingredients_list:
 
     # Add a Submit button
     if st.button("Submit Order"):
-       my_insert_stmt = """
-            INSERT INTO smoothies.public.orders(ingredients, name_on_order)
-            VALUES (?, ?)
-        """
-        session.sql(my_insert_stmt, (ingredients_string, name_on_order)).collect()
+       my_insert_stmt = f""" INSERT INTO smoothies.public.orders(ingredients, name_on_order) VALUES ('{ingredients_string}', '{name_on_order}') """ 
+        session.sql(my_insert_stmt).collect()
 
         st.success('Your Smoothie is ordered! ✅')
 
