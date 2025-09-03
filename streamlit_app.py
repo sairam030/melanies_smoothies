@@ -18,38 +18,31 @@ st.write("The name on your Smoothie will be", name_on_order)
 my_dataframe = session.table("smoothies.public.fruit_options").select(
     col("FRUIT_NAME"), col("SEARCH_ON")
 )
-
+pd_df = my_dataframe.to_pandas()
 
 # Multiselect for ingredients
 ingredients_list = st.multiselect(
     'Choose up to 5 ingredients:',
-    my_dataframe,
-    max_selections=5    
+    pd_df['FRUIT_NAME'],
+    max_selections=5
 )
 
+
 if ingredients_list:
-    ingredients_string = ", ".join(ingredients_list)
-    st.write("Ingredients chosen:", ingredients_string)
-
     for fruit_chosen in ingredients_list:
-        # 🔎 Look up SEARCH_ON from Snowflake for this FRUIT_NAME
-        search_value = (
-            session.table("smoothies.public.fruit_options")
-            .filter(col("FRUIT_NAME") == fruit_chosen)
-            .select(col("SEARCH_ON"))
-            .collect()[0][0]
-        )
+        # Look up the SEARCH_ON value using Pandas
+        search_on = pd_df.loc[pd_df['FRUIT_NAME'] == fruit_chosen, 'SEARCH_ON'].iloc[0]
+        st.write('The search value for ', fruit_chosen, ' is ', search_on, '.')
 
-        st.subheader(f"{fruit_chosen} Nutrition Information")
-
-        if search_value == "N/A":
+        if search_on == "N/A":
             st.warning(f"Sorry, {fruit_chosen} is not available in SmoothieFroot.")
         else:
-            response = requests.get(f"https://my.smoothiefroot.com/api/fruit/{search_value}")
+            response = requests.get(f"https://my.smoothiefroot.com/api/fruit/{search_on}")
             if response.status_code == 200:
                 st.dataframe(response.json(), use_container_width=True)
             else:
                 st.error(f"Could not fetch data for {fruit_chosen}")
+
 
 
 # Add a Submit button
