@@ -1,7 +1,5 @@
 # Import python packages
 import streamlit as st
-import pandas as pd
-import requests
 from snowflake.snowpark.functions import col
 
 cnx = st.connection("snowflake")
@@ -29,19 +27,8 @@ ingredients_list = st.multiselect(
 if ingredients_list:
     # Convert list into a comma-separated string
     ingredients_string = ", ".join(ingredients_list)
+
     st.write("Ingredients chosen:", ingredients_string)
-
-    # 🍉 Call SmoothieFroot API for each selected ingredient
-    for fruit in ingredients_list:
-        fruit_name = fruit.lower()
-        smoothiefroot_response = requests.get(f"https://my.smoothiefroot.com/api/fruit/{fruit_name}")
-
-        if smoothiefroot_response.status_code == 200:
-            sf_df = pd.json_normalize(smoothiefroot_response.json())
-            st.subheader(f"Nutrition for {fruit}")
-            st.dataframe(sf_df)
-        else:
-            st.error(f"Could not find {fruit} in SmoothieFroot API.")
 
     # Add a Submit button
     if st.button("Submit Order"):
@@ -51,3 +38,7 @@ if ingredients_list:
         """
         session.sql(my_insert_stmt).collect()
         st.success('Your Smoothie is ordered! ✅')
+
+import requests
+smoothiefroot_response = requests.get("https://my.smoothiefroot.com/api/fruit/watermelon")
+st.text(smoothiefroot_response)
