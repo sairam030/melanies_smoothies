@@ -28,24 +28,36 @@ ingredients_list = st.multiselect(
 )
 
 # Only proceed if user picked something
-if ingredients_list:
-    ingredients_string = ", ".join(ingredients_list)
-    st.write("Ingredients chosen:", ingredients_string)
+# if ingredients_list:
+#     ingredients_string = ", ".join(ingredients_list)
+#     st.write("Ingredients chosen:", ingredients_string)
 
-    # Show nutrition only for valid fruits
+#     # Show nutrition only for valid fruits
+#     for fruit_chosen in ingredients_list:
+#         search_on = pd_df.loc[pd_df['FRUIT_NAME'] == fruit_chosen, 'SEARCH_ON'].iloc[0]
+
+#         st.subheader(f"{fruit_chosen} Nutrition Information")
+
+#         if search_on == "N/A":
+#             st.info(f"{fruit_chosen} added to your smoothie! ✅ (No nutrition data available)")
+#         else:
+#             response = requests.get(f"https://my.smoothiefroot.com/api/fruit/{search_on}")
+#             if response.status_code == 200:
+#                 st.dataframe(response.json(), use_container_width=True)
+#             else:
+#                 st.warning(f"Sorry, no data found for {fruit_chosen}")
+
+if ingredients_tist:
+    ingredients_string = ''
     for fruit_chosen in ingredients_list:
-        search_on = pd_df.loc[pd_df['FRUIT_NAME'] == fruit_chosen, 'SEARCH_ON'].iloc[0]
+        ingredients_string += fruit_chosen + ' '
 
-        st.subheader(f"{fruit_chosen} Nutrition Information")
+        search_on = pd_df.loc[pd_df['FRUIT_NAME'] == fruit_chosen, 'SEARCH_ON'.iloc[0]
+        
 
-        if search_on == "N/A":
-            st.info(f"{fruit_chosen} added to your smoothie! ✅ (No nutrition data available)")
-        else:
-            response = requests.get(f"https://my.smoothiefroot.com/api/fruit/{search_on}")
-            if response.status_code == 200:
-                st.dataframe(response.json(), use_container_width=True)
-            else:
-                st.warning(f"Sorry, no data found for {fruit_chosen}")
+        st.subheader(fruit_chosen + ' Nutrition Information')
+        fruityvice_response = requests.get("https://fruityvice.com/api/fruit/" + search_on)
+        fv_df = st.dataframe(data=fruityvice_response.json(), use_container_width=True)
 
     # Add a Submit button
 if st.button("Submit Order"):
